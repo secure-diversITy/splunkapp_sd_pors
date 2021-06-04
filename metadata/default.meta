@@ -1,0 +1,59 @@
+
+# Application-level permissions
+
+[]
+access = read : [ * ], write : [ admin, power ]
+
+### EVENT TYPES
+
+[eventtypes]
+export = system
+
+
+### PROPS
+
+[props]
+export = system
+
+
+### TRANSFORMS
+
+[transforms]
+export = system
+
+
+### LOOKUPS
+
+[lookups]
+export = system
+
+
+### VIEWSTATES: even normal users should be able to create shared viewstates
+
+[viewstates]
+access = read : [ * ], write : [ * ]
+export = system
+
+[app/ui]
+version = 7.1.0
+modtime = 1526707596.897398000
+
+[app/launcher]
+version = 7.1.0
+modtime = 1526707596.902842000
+
+[app/package/check_for_updates]
+version = 7.1.0
+modtime = 1526707596.905133000
+
+[views/ansible_plays_overview]
+owner = admin
+version = 7.1.0
+modtime = 1526802198.456095000
+
+[views/ansible_play_detail]
+access = read : [ * ], write : [ admin, power ]
+export = none
+owner = admin
+version = 7.1.0
+modtime = 1526801695.271414000

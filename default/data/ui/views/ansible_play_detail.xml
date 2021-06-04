@@ -1,0 +1,246 @@
+<form>
+  <search id="play_base">
+    <query>eventtype=pors_plays session=* |eval target_env=if(isnull(target_env),"unknown",target_env) | fields *</query>
+    <!-- we HAVE TO use | fields as all searches run in fast mode and so fields will not get extracted properly -->
+    <earliest>$timerange.earliest$</earliest>
+    <latest>$timerange.latest$</latest>
+  </search>
+  <init>
+    <set token="ansible_status">*</set>
+  </init>
+  <label>Details</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="timerange">
+      <label></label>
+      <default>
+        <earliest>-4h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="tok_play" searchWhenChanged="true">
+      <label>Select Ansible Play</label>
+      <fieldForLabel>ansible_playbook</fieldForLabel>
+      <fieldForValue>ansible_playbook</fieldForValue>
+      <search base="play_base">
+        <query>search ansible_playbook != "__adhoc_playbook__"| stats count by ansible_playbook</query>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+    </input>
+    <input type="dropdown" token="ansible_session" searchWhenChanged="true">
+      <label>Select Session (optional)</label>
+      <fieldForLabel>session</fieldForLabel>
+      <fieldForValue>session</fieldForValue>
+      <search base="play_base">
+        <query>search ansible_playbook="$tok_play$"| stats count by session</query>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+    </input>
+    <input type="checkbox" token="tok_state" searchWhenChanged="true">
+      <label>Status</label>
+      <fieldForLabel>status</fieldForLabel>
+      <fieldForValue>status</fieldForValue>
+      <search>
+        <query>eventtype=pors_plays session=*|stats count by status</query>
+      </search>
+      <choice value="*">Any</choice>
+      <prefix>(status="</prefix>
+      <suffix>")</suffix>
+      <delimiter>" OR status="</delimiter>
+      <default>FAILED,OK,UNREACHABLE</default>
+    </input>
+    <input type="multiselect" token="tok_env" searchWhenChanged="true">
+      <label>Environment</label>
+      <fieldForLabel>target_env</fieldForLabel>
+      <fieldForValue>target_env</fieldForValue>
+      <search base="play_base">
+        <query>stats count by target_env</query>
+      </search>
+      <choice value="*">Any</choice>
+      <prefix>(target_env="</prefix>
+      <suffix>")</suffix>
+      <delimiter>"  OR target_env="</delimiter>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>All Tasks</title>
+      <single>
+        <search base="play_base">
+          <query>| search session=$ansible_session$ | stats count</query>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="form.tok_state">*</set>
+          <set token="tok_state">*</set>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Successful Tasks</title>
+      <single>
+        <search base="play_base">
+          <query>| search session=$ansible_session$ status=OK | stats count</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0xdc4e41"]</option>
+        <option name="rangeValues">[999999999999]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown>
+          <set token="ansible_status">OK</set>
+          <set token="tok_state">OK</set>
+          <set token="form.tok_state">OK</set>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Skipped Tasks</title>
+      <single>
+        <search base="play_base">
+          <query>| search session=$ansible_session$ status=SKIPPED | stats count</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x555","0xdc4e41"]</option>
+        <option name="rangeValues">[9999999999999]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown>
+          <set token="tok_state">SKIPPED</set>
+          <set token="form.tok_state">SKIPPED</set>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Failed Tasks</title>
+      <single>
+        <search base="play_base">
+          <query>| search session=$ansible_session$ status="FAILED"  | stats count</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0xdc4e41"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown>
+          <set token="form.tok_state">FAILED</set>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Unreachable Tasks</title>
+      <single>
+        <search base="play_base">
+          <query>| search session=$ansible_session$ status="UNREACHABLE" | stats count</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0xdc4e41"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown>
+          <set token="form.tok_state">UNREACHABLE</set>
+        </drilldown>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Ansible Play Task - Click above to filter and below for task details</title>
+      <table>
+        <search base="play_base">
+          <query>
+            | search session=$ansible_session$ $tok_state$ $tok_env$ ansible_playbook="$tok_play$"
+            | spath path="ansible_result.msg{}" output=task_stdout | nomv task_stdout
+            | spath path="ansible_result.stdout_lines{}" output=task_stdout_lines | nomv task_stdout_lines
+            | rename ansible_host AS target_host, ansible_task.name AS task_name, ansible_result.msg AS ansible_result_msg, ansible_result.stderr_lines{} AS task_stderr_lines, ansible_result.skip_reason AS task_skip_reason, ansible_result.skipped_reason AS task_skipped_reason, ansible_result.censored AS task_result_censored
+            | eval task_skip_reason=case(isnotnull(task_skip_reason) AND status="SKIPPED",task_skip_reason,isnotnull(task_skipped_reason) AND status="SKIPPED",task_skipped_reason,1=1,task_skipped_reason)
+            | eval task_output=case(isnotnull(task_skip_reason) AND status="SKIPPED",task_skip_reason,isnotnull(task_stderr_lines),task_stderr_lines,isnotnull(task_stdout),task_stdout,isnotnull(task_stdout_lines),task_stdout_lines,isnotnull(ansible_result_msg),ansible_result_msg,isnotnull(task_result_censored),task_result_censored,1=1,"")
+            | table _time target_env ansible_playbook task_name task_output target_host status uuid| sort -_time
+        </query>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">row</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <fields>["_time","target_env","ansible_playbook","task_name","task_output","target_host","status"]</fields>
+        <drilldown>
+          <set token="ansible_uuid">$row.uuid$</set>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$ansible_uuid$">
+      <title>Task details</title>
+      <event>
+        <title>(drilldown will close this panel instead)</title>
+        <search>
+          <query>eventtype=pors_plays session=$ansible_session$ uuid=$ansible_uuid$</query>
+          <earliest>$timerange.earliest$</earliest>
+          <latest>$timerange.latest$</latest>
+        </search>
+        <option name="list.drilldown">full</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <unset token="ansible_uuid"></unset>
+        </drilldown>
+      </event>
+    </panel>
+  </row>
+</form>

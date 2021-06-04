@@ -1,0 +1,191 @@
+<form>
+  <search id="play_base">
+    <query>eventtype=pors_plays session=* |eval target_env=if(isnull(target_env),"unknown",target_env) | fields *</query>
+    <!-- we HAVE TO use | fields as all searches run in fast mode and so fields will not get extracted properly -->
+    <earliest>$timerange.earliest$</earliest>
+    <latest>$timerange.latest$</latest>
+  </search>
+  <init>
+    <set token="ansible_status">*</set>
+    <set token="tok_env">target_env="*"</set>
+  </init>
+  <label>Overview</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="timerange">
+      <label>Time Range</label>
+      <default>
+        <earliest>@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="link" token="reset" searchWhenChanged="true">
+      <label>Reset Dashboard</label>
+      <change>
+        <condition>
+          <set token="ansible_status">*</set>
+          <set token="tok_env">target_env="*"</set>
+          <unset token="form.tok_env"></unset>
+          <unset token="form.reset"></unset>
+        </condition>
+      </change>
+      <choice value="1">Click here to reset</choice>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Recent Ansible Plays</title>
+      <single>
+        <search base="play_base">
+          <query>| timechart span=1h dc(session) as count</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown>
+          <set token="ansible_status">*</set>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Recent Ansible Plays with Errors</title>
+      <single>
+        <search base="play_base">
+          <query>search (status="FAILED" OR status="UNREACHABLE") | timechart span=1h dc(session) as count</query>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="height">122</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0xdc4e41"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">1</option>
+        <drilldown>
+          <set token="ansible_status">FAILED</set>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <title>Status Summary</title>
+      <chart>
+        <search base="play_base">
+          <query> | stats count by status</query>
+        </search>
+        <option name="charting.fieldColors">{"OK": 0x33cc33, "SKIPPED": 0x999999, "FAILED": 0xff0000, "UNREACHABLE": 0xff6600}</option>
+        <option name="height">125</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <drilldown>
+          <set token="ansible_status">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Plays by Environment</title>
+      <chart>
+        <search base="play_base">
+          <query>| eval target_env=if(isnull(target_env),"unknown",target_env) | stats count by target_env</query>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.showDataLabels">minmax</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.fieldColors">{"production": 0x3399ff, "staging": 0xffaa00, "development": 0xff00ff, "unknown": 0xb3b3b3}</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="height">125</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <drilldown>
+          <set token="tok_env">target_env="$click.value$"</set>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Useful links</title>
+      <html>
+      	<table width="90%" border="0">
+        <tbody>
+      	<tr>
+      		<td>
+      		  <p style="float: left">
+        		<a href="https://github.com/secure-diversITy/ansible_pors/wiki" target="_blank">Getting Started </a>
+        	  </p>
+        	</td>
+        	<td>
+                <a href="https://www.secure-diversITy.com" target="_blank">Support </a>
+              </td>
+      		<td>
+                <a href="https://github.com/secure-diversITy/ansible_pors/issues" target="_blank">Issue tracker</a>
+              </td>
+        </tr>
+        </tbody>
+        </table>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Ansible Plays - Click on charts above to filter and plays below to drill into details</title>
+      <table>
+        <search base="play_base">
+          <query>|search status=$ansible_status$ $tok_env$
+| stats earliest(_time) as PlaybookStart latest(_time) as PlaybookEnd latest(target_env) as target_env by ansible_playbook session
+| eval RunSecs=PlaybookEnd-PlaybookStart
+| eval RunDuration=tostring(RunSecs, "duration")
+| eval PlaybookStart=strftime(PlaybookStart,"%Y-%m-%d %H:%M:%S")
+| eval PlaybookEnd=strftime(PlaybookEnd,"%Y-%m-%d %H:%M:%S")
+| table target_env ansible_playbook session PlaybookStart PlaybookEnd RunDuration
+| sort -PlaybookStart</query>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">row</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <link target="_self">/app/sd_pors/ansible_play_detail?form.ansible_session=$row.session$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>

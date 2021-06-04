@@ -1,0 +1,6 @@
+<nav search_view="search">
+  <view name="ansible_plays_overview" default="true"/>
+  <view name="ansible_play_detail"/>
+  <view name="alerts"/>
+  <view name="search"/>
+</nav>
