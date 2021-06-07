@@ -144,9 +144,7 @@
         <tbody>
       	<tr>
       		<td>
-      		  <p style="float: left">
-        		<a href="https://github.com/secure-diversITy/ansible_pors/wiki" target="_blank">Getting Started </a>
-        	  </p>
+        		<a href="https://github.com/secure-diversITy/ansible_pors/wiki/pors_app" target="_blank">Setup Guide </a>
         	</td>
         	<td>
                 <a href="https://www.secure-diversITy.com" target="_blank">Support </a>

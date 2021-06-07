@@ -22,7 +22,7 @@
       <fieldForLabel>ansible_playbook</fieldForLabel>
       <fieldForValue>ansible_playbook</fieldForValue>
       <search base="play_base">
-        <query>search ansible_playbook != "__adhoc_playbook__"| stats count by ansible_playbook</query>
+        <query>stats count by ansible_playbook</query>
       </search>
       <choice value="*">All</choice>
       <default>*</default>
