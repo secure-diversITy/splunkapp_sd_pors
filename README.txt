@@ -1,24 +1,20 @@
-# Playbooks on Rails for Splunk (PORS)
+About:
 
-Playbooks-On-Rails for Splunk (PORS) is a collection of ansible playbooks, roles & tasks for everything around Splunk.<br/>
-Remembering all the playbook commands is not comfortable so PORS comes with a GUI (ncurses/dialog based) and a lot of nice features on top.
+Playbooks-On-Rails App (powered by Ansible) is the companion app to Playbooks-On-Rails for Splunk (PORS).
+Even though this app has been adapted to work best when using PORS it can be used to visualize any Ansible playbook runs as well.
 
-This app allows:
-* some useful insights of playbooks which were run by PORS
-* alerting for failed playbooks (predefined)
-* alerting for anything else you want - related to Ansible playbooks used by PORS ;)
-
-## Documentation
+Documentation:
 
 * PORS Splunk App installation & configuration: https://github.com/secure-diversITy/ansible_pors/wiki/pors_app
 * PORS documentation: https://github.com/secure-diversITy/ansible_pors/wiki
 
-## Copyright & License
+Copyright & License:
 
 Copyright
+
 * 2018 Deloitte
 * 2021 Thomas Fischer - secure diversITy
 
 License
-* GPL v3: https://www.gnu.org/licenses/gpl-3.0-standalone.html
+* GPL v3: README/LICENSE.md and/or https://www.gnu.org/licenses/gpl-3.0-standalone.html
 
