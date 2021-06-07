@@ -2,7 +2,8 @@
 # Application-level permissions
 
 []
-access = read : [ * ], write : [ admin, power ]
+access = read : [ admin ], write : [ admin, power ]
+export = none
 
 ### EVENT TYPES
 
