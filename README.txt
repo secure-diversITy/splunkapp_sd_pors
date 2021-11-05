@@ -18,3 +18,4 @@ Copyright
 License
 * GPL v3: README/LICENSE.md and/or https://www.gnu.org/licenses/gpl-3.0-standalone.html
 
+# Binary File Declaration

@@ -1,4 +1,4 @@
-<form>
+<form version="1.1">
   <search id="play_base">
     <query>eventtype=pors_plays session=* |eval target_env=if(isnull(target_env),"unknown",target_env) | fields *</query>
     <!-- we HAVE TO use | fields as all searches run in fast mode and so fields will not get extracted properly -->

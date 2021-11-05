@@ -1,4 +1,4 @@
-<form>
+<form version="1.1">
   <search id="play_base">
     <query>eventtype=pors_plays session=* |eval target_env=if(isnull(target_env),"unknown",target_env) | fields *</query>
     <!-- we HAVE TO use | fields as all searches run in fast mode and so fields will not get extracted properly -->
@@ -69,7 +69,7 @@
       <title>All Tasks</title>
       <single>
         <search base="play_base">
-          <query>| search session=$ansible_session$ | stats count</query>
+          <query>| search session=$ansible_session$ $tok_env$ | stats count</query>
         </search>
         <option name="drilldown">all</option>
         <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
@@ -84,7 +84,7 @@
       <title>Successful Tasks</title>
       <single>
         <search base="play_base">
-          <query>| search session=$ansible_session$ status=OK | stats count</query>
+          <query>| search session=$ansible_session$ status=OK $tok_env$ | stats count</query>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">block</option>
@@ -114,7 +114,7 @@
       <title>Skipped Tasks</title>
       <single>
         <search base="play_base">
-          <query>| search session=$ansible_session$ status=SKIPPED | stats count</query>
+          <query>| search session=$ansible_session$ status=SKIPPED $tok_env$ | stats count</query>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">block</option>
@@ -143,7 +143,7 @@
       <title>Failed Tasks</title>
       <single>
         <search base="play_base">
-          <query>| search session=$ansible_session$ status="FAILED"  | stats count</query>
+          <query>| search session=$ansible_session$ status="FAILED" $tok_env$ | stats count</query>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">block</option>
@@ -171,7 +171,7 @@
       <title>Unreachable Tasks</title>
       <single>
         <search base="play_base">
-          <query>| search session=$ansible_session$ status="UNREACHABLE" | stats count</query>
+          <query>| search session=$ansible_session$ status="UNREACHABLE" $tok_env$ | stats count</query>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">block</option>
